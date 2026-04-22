@@ -68,23 +68,26 @@ button {
 
 <body>
 
-<!-- LOGO -->
+<!-- LOGO SPLASH -->
 <div id="logoScreen" class="logo-screen">
-<img src="assets/innovine_logo.png" onerror="alert('Logo not found. Check path: assets/innovine_logo.png')">
+<img src="assets/innovine-logo.png">
 </div>
 
 <div class="container hidden" id="app">
 
+<!-- INTRO -->
 <div id="intro">
 <h2>Storage Device Quiz</h2>
-<button onclick="startQuiz()">Start</button>
+<p>Grade 4 | ICT</p>
+<button onclick="startQuiz()">Start Quiz</button>
 </div>
 
+<!-- QUIZ -->
 <div id="quiz" class="hidden">
 
 <div class="top">
-<div id="score">Score:0</div>
-<div id="timer">45</div>
+<div id="score">Score: 0</div>
+<div id="timer">Time: 45</div>
 </div>
 
 <h3 id="question"></h3>
@@ -95,6 +98,7 @@ button {
 
 </div>
 
+<!-- RESULT -->
 <div id="result" class="hidden">
 <h2>Final Score: <span id="finalScore"></span>/10</h2>
 <button onclick="location.reload()">Retry</button>
@@ -108,35 +112,37 @@ button {
 
 <script>
 
-// Splash
+// LOGO SPLASH (5 sec)
 setTimeout(()=>{
 document.getElementById("logoScreen").style.display="none";
 document.getElementById("app").classList.remove("hidden");
 },5000);
 
-// Questions
-const q = [
-{q:"What is memory used for?",o:["Games","Store data","Typing","Printing"],a:1,exp:"Stores data"},
-{q:"Which is temporary?",o:["ROM","RAM","DVD","HDD"],a:1,exp:"RAM loses data"},
-{q:"Permanent memory?",o:["RAM","ROM","Cache","CPU"],a:1,exp:"ROM permanent"},
-{q:"Large storage?",o:["RAM","Hard Drive","Mouse","CPU"],a:1,exp:"Hard drive large"},
-{q:"Portable storage?",o:["Mouse","Pen Drive","Monitor","Keyboard"],a:1,exp:"Pen drive portable"},
-{q:"CPU directly uses?",o:["Primary","Secondary","Cloud","External"],a:0,exp:"Primary memory"},
-{q:"4.7GB device?",o:["CD","DVD","RAM","USB"],a:1,exp:"DVD capacity"},
-{q:"Non-volatile?",o:["RAM","ROM","Cache","Register"],a:1,exp:"ROM safe"},
-{q:"Cannot erase?",o:["CD-R","CD-RW","USB","SSD"],a:0,exp:"CD-R fixed"},
-{q:"Fast but small?",o:["Primary","Secondary","Cloud","External"],a:0,exp:"Primary fast"}
+// QUESTIONS
+const questions = [
+{q:"What is computer memory used for?",o:["Playing games","Storing data","Typing","Printing"],a:1,exp:"Memory stores data."},
+{q:"Which memory is temporary?",o:["ROM","RAM","DVD","Hard Drive"],a:1,exp:"RAM loses data when power is off."},
+{q:"Which memory is permanent?",o:["RAM","ROM","Cache","Register"],a:1,exp:"ROM stores permanent data."},
+{q:"Which device has large storage?",o:["RAM","Hard Drive","CPU","Monitor"],a:1,exp:"Hard drive stores large data."},
+{q:"Which device is portable?",o:["Keyboard","Pen Drive","Mouse","Speaker"],a:1,exp:"Pen drive is portable."},
+{q:"Which memory is directly accessed?",o:["Primary","Secondary","External","Optical"],a:0,exp:"Primary memory is directly accessed."},
+{q:"Which stores about 4.7GB?",o:["CD","DVD","Pen Drive","RAM"],a:1,exp:"DVD stores 4.7GB."},
+{q:"Which is non-volatile?",o:["RAM","Cache","ROM","Register"],a:2,exp:"ROM keeps data."},
+{q:"Which cannot erase data?",o:["CD-R","CD-RW","Pen Drive","Hard Disk"],a:0,exp:"CD-R cannot erase data."},
+{q:"Which is fast but small?",o:["Primary","Secondary","Cloud","External"],a:0,exp:"Primary memory is fast but small."}
 ];
 
-let i=0,score=0,attempt=0,timer,time=45;
+let index=0,score=0,attempt=0,timer,time=45;
 
+// START QUIZ
 function startQuiz(){
 document.getElementById("intro").classList.add("hidden");
 document.getElementById("quiz").classList.remove("hidden");
-loadQ();
+loadQuestion();
 }
 
-function loadQ(){
+// LOAD QUESTION
+function loadQuestion(){
 attempt=0;
 time=45;
 document.getElementById("nextBtn").classList.add("hidden");
@@ -144,60 +150,69 @@ document.getElementById("feedback").innerText="";
 
 startTimer();
 
-document.getElementById("question").innerText=q[i].q;
+let q=questions[index];
+document.getElementById("question").innerText=q.q;
 
-let optDiv=document.getElementById("options");
-optDiv.innerHTML="";
+let optionsDiv=document.getElementById("options");
+optionsDiv.innerHTML="";
 
-q[i].o.forEach((opt,index)=>{
+q.o.forEach((opt,i)=>{
 let div=document.createElement("div");
 div.className="option";
 div.innerText=opt;
-div.onclick=()=>check(index,div);
-optDiv.appendChild(div);
+div.onclick=()=>checkAnswer(i,div);
+optionsDiv.appendChild(div);
 });
 }
 
+// TIMER
 function startTimer(){
 clearInterval(timer);
 timer=setInterval(()=>{
 time--;
-document.getElementById("timer").innerText="Time:"+time;
-if(time==0){
+document.getElementById("timer").innerText="Time: "+time;
+
+if(time===0){
 clearInterval(timer);
 showNext();
 }
 },1000);
 }
 
-function check(sel,el){
-if(sel===q[i].a){
-el.classList.add("correct");
+// CHECK ANSWER
+function checkAnswer(selected,element){
+let q=questions[index];
+
+if(selected===q.a){
+element.classList.add("correct");
 document.getElementById("correctSound").play();
 score++;
-update();
+updateScore();
 showNext();
 }else{
 attempt++;
-el.classList.add("wrong");
+element.classList.add("wrong");
 document.getElementById("wrongSound").play();
 
-if(attempt==2){
-document.getElementById("feedback").innerText="Correct: "+q[i].o[q[i].a]+" | "+q[i].exp;
+if(attempt===2){
+document.getElementById("feedback").innerText=
+"Correct: "+q.o[q.a]+" | "+q.exp;
 showNext();
 }
 }
 }
 
+// SHOW NEXT BUTTON
 function showNext(){
 clearInterval(timer);
 document.getElementById("nextBtn").classList.remove("hidden");
 }
 
+// NEXT QUESTION
 function nextQuestion(){
-i++;
-if(i<q.length){
-loadQ();
+index++;
+if(index<questions.length){
+loadQuestion();
 }else{
 document.getElementById("quiz").classList.add("hidden");
 document.getElementById("result").classList.remove("hidden");
@@ -205,8 +220,9 @@ document.getElementById("finalScore").innerText=score;
 }
 }
 
-function update(){
-document.getElementById("score").innerText="Score:"+score;
+// UPDATE SCORE
+function updateScore(){
+document.getElementById("score").innerText="Score: "+score;
 }
 
 </script>
